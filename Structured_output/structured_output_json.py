@@ -1,10 +1,7 @@
-from langchain_huggingface import HuggingFaceEndpoint ,ChatHuggingFace
+from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 from dotenv import load_dotenv
-import os
-from typing import TypedDict , Optional , Annotated 
-from pydantic import BaseModel , Field , EmailStr
 load_dotenv()
-import re
+import os
 
 llm = HuggingFaceEndpoint(
     repo_id="Qwen/Qwen3-32B",
@@ -15,18 +12,57 @@ llm = HuggingFaceEndpoint(
     
 )
 
-model =ChatHuggingFace(llm = llm)
+model = ChatHuggingFace(llm = llm)
 
-class review(BaseModel):
-    summary: str = Field(description='A brief summary of review')
-    sentiment: str = Field(default=None , description="Analize if the review is positive or negative")
-    key_features : list[str] = Field(description="Key features from the review")
-    cons: list[str] = Field(default=None , description= 'cons from the review if exist')
-    pros: list[str] = Field(default=None , description= 'pros from the review if exist')
-    name: str = Field(default=None , description='Name of the reviewer')
+json_schema = {
+  "title": "review_analysis",
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "A brief summary of review"
+    },
+    "sentiment": {
+      "type": "string",
+      "description": "Analize if the review is positive or negative",
+      "default": None
+    },
+    "key_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Key features from the review"
+    },
+    "cons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "cons from the review if exist",
+      "default": None
+    },
+    "pros": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "pros from the review if exist",
+      "default": None
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the reviewer",
+      "default": None
+    }
+  },
+  "required": [
+    "summary",
+    "key_features"
+  ]
+}
 
-structured_model = model.with_structured_output(review)
-
+structured_model = model.with_structured_output(json_schema)
 
 result = structured_model.invoke("""I recently upgraded to the Samsung Galaxy S24 Ultra, and I must say, it's an absolute powerhouse! The Snapdragon 8 Gen 3
 processor makes everything lightning fast-whether I'm gaming, multitasking, or editing photos. The 5000mAh battery easily
