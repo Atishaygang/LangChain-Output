@@ -19,18 +19,19 @@ class Person(BaseModel):
     name: str = Field(description='Name of the character')
     age: int = Field(description="Age of the character")
     city: str = Field(description="City of the character")
+    dark_fact: str = Field(description="Dark fact in one line about the character")
 
 parser = PydanticOutputParser(pydantic_object=Person)
 
 template = PromptTemplate(
-    template=('Write the name of a character who belongs from America and famous , {City} of the character and age of that character \n {format_instruction}'),
+    template=('Write the name of two cartoon character who belongs from {City} famous , city of the character, age and one dark fact of that character \n {format_instruction}'),
     input_variables=[
         'City'
     ],
     partial_variables={'format_instruction' : parser.get_format_instructions()}
 )
 
-prompt = template.format(City = 'America')
+prompt = template.format(City ='Japan')
 
 result = model.invoke(prompt)
 final_result = parser.parse(result.content)
